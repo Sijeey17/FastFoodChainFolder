@@ -1,0 +1,204 @@
+package FastFoodChainFolder;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+// This class represents a menu item in the restaurant
+class MenuItem {
+    private String name;
+    private double price;
+    private String description;
+
+    // Constructor
+    public MenuItem(String name, double price, String description) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+    }
+
+    // Getters
+    public String getName() {
+        return name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+}
+
+// This class handles the collection of menu items
+class Menu {
+    private List<MenuItem> items;
+
+    public Menu() {
+        items = new ArrayList<>();
+    }
+
+    public void addItem(MenuItem item) {
+        items.add(item);
+    }
+
+    public void removeItem(String itemName) {
+        items.removeIf(item -> item.getName().equalsIgnoreCase(itemName));
+    }
+
+    public void displayMenu() {
+        System.out.println("Menu:");
+        for (MenuItem item : items) {
+            System.out.printf("%s - $%.2f: %s%n", item.getName(), item.getPrice(), item.getDescription());
+        }
+    }
+
+    public MenuItem getItem(String itemName) {
+        for (MenuItem item : items) {
+            if (item.getName().equalsIgnoreCase(itemName)) {
+                return item;
+            }
+        }
+        return null; // Item not found
+    }
+}
+
+// This class manages customer orders
+class Order {
+    private List<MenuItem> orderedItems;
+    public double totalAmount;
+
+    public Order() {
+        orderedItems = new ArrayList<>();
+        totalAmount = 0.0;
+    }
+
+    public void addItem(MenuItem item) {
+        orderedItems.add(item);
+        calculateTotal();
+    }
+
+    public void removeItem(String itemName) {
+        orderedItems.removeIf(item -> item.getName().equalsIgnoreCase(itemName));
+        calculateTotal();
+    }
+
+    public void calculateTotal() {
+        totalAmount = orderedItems.stream().mapToDouble(MenuItem::getPrice).sum();
+    }
+
+    public void displayOrder() {
+        System.out.println("Current Order:");
+        for (MenuItem item : orderedItems) {
+            System.out.printf("%s - $%.2f%n", item.getName(), item.getPrice());
+        }
+        System.out.printf("Total Amount: $%.2f%n", totalAmount);
+    }
+}
+
+// This class handles payment processing
+class Payment {
+    private double amount;
+
+    public Payment(double amount) {
+        this.amount = amount;
+    }
+
+    public boolean processPayment(String paymentMethod) {
+        // Simulate payment processing logic
+        System.out.printf("Processing %s payment of $%.2f...%n", paymentMethod, amount);
+        return true; // Assume payment is always successful for simplicity
+    }
+
+    public void printReceipt(Order order) {
+        System.out.println("Receipt:");
+        order.displayOrder();
+        System.out.println("Thank you for your order!");
+    }
+}
+
+// This main class manages the overall system
+public class RestaurantKiosk {
+    private Menu menu;
+    private List<Order> orders;
+
+    public RestaurantKiosk() {
+        menu = new Menu();
+        orders = new ArrayList<>();
+    }
+
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        RestaurantKiosk kiosk = new RestaurantKiosk();
+
+        // Sample menu items
+        kiosk.menu.addItem(new MenuItem("Burger", 5.99, "Juicy beef burger"));
+        kiosk.menu.addItem(new MenuItem("Fries", 2.99, "Crispy golden fries"));
+        kiosk.menu.addItem(new MenuItem("Soda", 1.50, "Refreshing soda"));
+
+        System.out.printf("%-1s%-1s%n", "", "==========================================");
+        System.out.printf("%-17.5s%-15s%n", "", "Jabilee");
+        System.out.printf("%-1s%-1s%n", "", "==========================================");
+
+        kiosk.start(input);
+        input.close();
+    }
+
+    public void start(Scanner input) {
+        boolean running = true;
+        while (running) {
+            System.out.println("1. Display Menu");
+            System.out.println("2. Create Order");
+            System.out.println("3. Exit");
+            System.out.print("Choose an option: ");
+            int choice = input.nextInt();
+            input.nextLine(); // Consume newline
+
+            switch (choice) {
+            case 1:
+                menu.displayMenu();
+                break;
+            case 2:
+                createOrder(input);
+                break;
+            case 3:
+                running = false;
+                break;
+            default:
+                System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+
+    public void createOrder(Scanner input) {
+        Order order = new Order();
+        boolean ordering = true;
+
+        while (ordering) {
+            System.out.print("Enter the name of the menu item to add (or 'done' to finish): ");
+            String itemName = input.nextLine();
+
+            if (itemName.equalsIgnoreCase("done")) {
+                ordering = false;
+                break;
+            }
+
+            MenuItem item = menu.getItem(itemName);
+            if (item != null) {
+                order.addItem(item);
+                System.out.println(item.getName() + " added to your order.");
+            } else {
+                System.out.println("Item not found.");
+            }
+        }
+
+        order.displayOrder();
+        System.out.print("Enter payment method (credit/cash): ");
+        String paymentMethod = input.nextLine();
+        Payment payment = new Payment(order.totalAmount);
+        if (payment.processPayment(paymentMethod)) {
+            payment.printReceipt(order);
+        }
+    }
+}

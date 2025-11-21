@@ -1,0 +1,36 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "RestaurantKiosk",
+            "request": "launch",
+            "mainClass": "Project.src.RestaurantKiosk",
+            "projectName": "FastFoodChainFolder_48c0645d"
+        },
+        {
+            "type": "java",
+            "name": "TestingSql",
+            "request": "launch",
+            "mainClass": "Project.src.TestingSql",
+            "projectName": "FastFoodChainFolder_48c0645d"
+        },
+        {
+            "type": "java",
+            "name": "Kiosk",
+            "request": "launch",
+            "mainClass": "src.Kiosk",
+            "projectName": "FastFoodChainFolder_48c0645d"
+        },
+        {
+            "type": "java",
+            "name": "RestaurantKiosk",
+            "request": "launch",
+            "mainClass": "src.RestaurantKiosk",
+            "projectName": "FastFoodChainFolder_48c0645d"
+        }
+    ]
+}

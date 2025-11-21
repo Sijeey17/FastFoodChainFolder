@@ -1,0 +1,357 @@
+import java.util.ArrayList;
+import java.util.InputMismatchException;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Map;
+import java.util.LinkedHashMap;
+import java.util.Iterator;
+
+// This class represents a menu item in the restaurant
+class MenuItem {
+    private String name;
+    private double price;
+    private String description;
+
+    public MenuItem(String name, double price, String description) {
+        this.name = name;
+        this.price = price;
+        this.description = description;
+    } 
+    public String getName() {
+        return name;
+    }
+    public double getPrice() {
+        return price;
+    }
+    public String getDesc() {
+        return description;
+    }
+    public String itemInfo() {
+        return String.format(" %-20s | Php%-7.2f | %-30s |", name, price, description);
+    }
+}
+// This class represents the menu containing multiple menu items
+class Menu {
+    private List<MenuItem> items; // List of menu items
+    public LinkedHashMap<Integer, MenuItem> menuList; // Map of item ID to ItemInfo (preserves insertion order)
+
+    public Menu() {
+        items = new ArrayList<>(); {
+            items.add( new MenuItem("YumBurger", 50.00, "Just a regular burger"));
+            items.add(new MenuItem("Jolly Spaghetti", 120.00, "Spaghetti"));
+            items.add(new MenuItem("Chicken Tender", 60.00, "Chicken"));
+            items.add(new MenuItem("Regular Fries", 40.00, "Fries"));
+        }
+        
+        menuList = new LinkedHashMap<>();
+        int id = 1;
+        for (MenuItem item : items) {
+            menuList.put(id++, item); // Assign IDs starting from 1
+        }
+    }
+    public MenuItem getItemById(int id) {
+        return menuList.get(id); // Retrieve item by ID
+    }
+    public void displayMenu() {
+        System.out.printf("|%s%s%s|%n", "==================================", "MENU", "==================================");
+        for (Map.Entry<Integer, MenuItem> entry : menuList.entrySet()) {
+            MenuItem item = entry.getValue();
+            System.out.printf("| [%d]%s%n", entry.getKey(), item.itemInfo());
+        }
+        System.out.println("|========================================================================|");
+    }
+}
+// OrderItem Class to track individual items (no quantity here; the Order's itemQuantities map is canonical)
+class OrderItem {
+    private final MenuItem item;
+
+    public OrderItem(MenuItem item) {
+        this.item = item;
+    }
+    public MenuItem getItem() {
+        return item; // Get the MenuItem
+    }
+    public double getTotalPrice(int quantity) {
+        return item.getPrice() * quantity; // Calculate total price based on passed quantity
+    }
+}
+// This class represents a customer's order
+class Order {
+    public List<OrderItem> orderItems;
+    public LinkedHashMap<MenuItem, Integer> itemQuantities;
+    public double totalAmount;
+    public double subTotal;     // sum of item prices before VAT
+    double totalVat = 0, vat = 0.12;
+
+    // Constructor
+    public Order() {
+        orderItems = new ArrayList<>();
+        itemQuantities = new LinkedHashMap<>();
+        totalAmount = 0.0;
+        subTotal = 0.0;
+    }
+
+    // Add item to order
+    public void addItem(MenuItem item) {
+        // Keep a single OrderItem per distinct MenuItem and track quantity in itemQuantities
+        if (!itemQuantities.containsKey(item)) {
+            orderItems.add(new OrderItem(item));
+        }
+        itemQuantities.put(item, itemQuantities.getOrDefault(item, 0) + 1);
+        calculateTotal();
+    }
+
+    // Remove item from order
+    public void removeItem(MenuItem item, int qtyToRemove) {
+        if (item == null) {
+            System.out.println("Item not found in the menu.");
+            return;
+        }
+        if (itemQuantities.containsKey(item)) {
+            int currentQuantity = itemQuantities.get(item);
+            if (qtyToRemove >= currentQuantity) {
+                itemQuantities.remove(item);
+                // remove corresponding OrderItem using iterator to avoid ConcurrentModificationException
+                Iterator<OrderItem> iterator = orderItems.iterator();
+                while (iterator.hasNext()) {
+                    OrderItem orderItem = iterator.next();
+                    if (orderItem.getItem().equals(item)) {
+                        iterator.remove();
+                        break;
+                    }
+                }
+                System.out.println(item.getName() + " removed from your order.");
+            } else {
+                itemQuantities.put(item, currentQuantity - qtyToRemove);
+                System.out.println(qtyToRemove + " of " + item.getName() + " removed from your order.");
+            }
+        } else {
+            System.out.println("Item not found in your order.");
+        }
+        calculateTotal(); // Recalculate total after removal
+    }
+
+    // Calculate total amount (fix: compute subtotal, VAT, then total)
+    public void calculateTotal() {
+        double total = 0;
+        for (Map.Entry<MenuItem, Integer> entry : itemQuantities.entrySet()) {
+            total += entry.getKey().getPrice() * entry.getValue();
+        }
+        subTotal = total;
+        totalVat = subTotal * vat;
+        totalAmount = subTotal + totalVat;
+    }
+
+    // Display order summary (now accepts Menu to print item IDs)
+    public void displayOrder(Menu menu) {
+        System.out.printf("|%s%s%s|%n", "======================", "Current order", "=====================");
+        System.out.printf("| %-24s | %-12s | %-12s |%n", "Item", "Quantity", "Amount");
+        System.out.print("----------------------------------------------------------\n");
+
+        for (Map.Entry<Integer, MenuItem> entry : menu.menuList.entrySet()) {
+            MenuItem menuItem = entry.getValue();
+            if (itemQuantities.containsKey(menuItem)) {
+                int quantity = itemQuantities.get(menuItem);
+                double amount = menuItem.getPrice() * quantity;
+                System.out.printf("| [%d]%-21s | %-12d | Php%-10.2f|%n", entry.getKey(),menuItem.getName(), quantity, amount);
+            }
+        }
+        System.out.print("----------------------------------------------------------\n");
+        System.out.printf("| %-42sPhp%-10.2f|%n%n", "Total Amount:", totalAmount);
+    }
+}
+// This class handles payment processing
+class Payment {
+    private double payment;
+    private double change = 0;
+
+    // processPayment now uses the passed Scanner (single Scanner for System.in)
+    public boolean processPayment(String paymentMethod, Order order, Scanner input) {
+        double remaining = order.totalAmount; // remaining amount to be paid
+        double totalPaid = 0;
+        double paid;
+
+        if (paymentMethod.equals("CASH")) {
+            while (true) {
+                while(true){
+                    try {
+                        System.out.print("Enter payment: ");
+                        paid = input.nextDouble();
+                        input.nextLine();
+                        break;
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid input. Please enter a valid amount.");
+                        input.nextLine(); // Clear invalid input
+                    }
+                }
+                totalPaid += paid;
+                remaining = order.totalAmount - totalPaid;
+                if (remaining <= 0) {
+                    payment = totalPaid;
+                    if (remaining < 0) change = -remaining;
+
+                    System.out.printf("Processing %s payment of Php%.2f...%n", paymentMethod, payment);
+                    break;
+                } else {
+                    System.out.printf("Insufficient payment. Please add Php %.2f%n", remaining);
+                }
+            }
+            return true;
+        } else if (paymentMethod.equals("CARD")) {
+            payment = order.totalAmount;
+            System.out.printf("Processing %s payment of Php%.2f...%n", paymentMethod, payment);
+            return true;
+        }
+        return false;
+    }
+
+    // Print receipt
+    public void printReceipt(Order order) {
+        System.out.print("----------------------------------------------------------\n");
+        System.out.printf("|\t\t          %-31s|%n","RECEIPT");
+        System.out.print("----------------------------------------------------------\n");
+        System.out.printf("| %-24s | %-12s | %-12s |%n", "Name", "Qty", "Price");
+        System.out.print("|--------------------------|--------------|--------------|\n");
+
+        // Iterate itemQuantities (canonical source of quantity)
+        for (Map.Entry<MenuItem, Integer> entry : order.itemQuantities.entrySet()) {
+            MenuItem mi = entry.getKey();
+            int qty = entry.getValue();
+            System.out.printf("| %-24s | %-12d | Php%-10.2f|%n", mi.getName(), qty, mi.getPrice() * qty);
+        }
+        System.out.print("----------------------------------------------------------\n");
+        System.out.printf("| \u001B[1m%s%20s%26.2f\u001B[0m|%n", "SUB TOTAL", "", order.subTotal);
+        System.out.printf("| VAT%26s%26.2f|%n", "", order.totalVat);
+        System.out.printf("| \u001B[1m%s%24s%26.2f\u001B[0m|%n", "TOTAL", "", order.totalAmount);
+        System.out.printf("| CASH%25s%26.2f|%n", "", payment);
+        System.out.printf("| CHANGE%23s%26.2f|%n", "", change);
+        System.out.print("----------------------------------------------------------\n");
+        System.out.printf("%n%33s%n%39s", "THANK YOU!", "Glad to see you again!");
+    }
+}
+// Main Testing Kiosk Class
+public class RestaurantKiosk {
+    private Menu menu;
+    private Payment payment;
+
+    public RestaurantKiosk() {
+        menu = new Menu();
+        payment = new Payment();
+    }
+    // Main Method
+    public static void main(String[] args) {
+        Scanner input = new Scanner(System.in);
+        RestaurantKiosk kiosk = new RestaurantKiosk();
+
+        System.out.println("==========================================================================");
+        System.out.printf("|%50s%23s%n", "Welcome to Restaurant Kiosk", "|");
+        System.out.println("==========================================================================");
+
+        kiosk.StartSystem(input);
+        input.close();
+    }
+
+    // Start the ordering system
+    public void StartSystem(Scanner input) {
+        Order order = new Order(); // Move order initialization outside the loop
+        boolean ordering = true;
+
+        while (ordering) {
+            menu.displayMenu(); // Display the menu each time
+            try {
+                System.out.print("1. Create Order\n2. Exit\n");
+                System.out.print("Enter your choice: ");
+                int choice = input.nextInt();
+                input.nextLine();
+
+                switch (choice) {
+                    case 1:
+                        createOrder(input, order);
+                        ordering = false;
+                        break;
+                    case 2:
+                        System.out.println("Exiting the system. Thank you!");
+                        ordering = false;
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please try again.");
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                input.nextLine();
+            }
+        }
+    }
+
+    // Create order
+    public void createOrder(Scanner input, Order order) {
+        boolean ordering = true;
+
+        while (ordering) {
+            try {
+                System.out.print("Enter Product Number (1-4), 9 to remove an item, or 0 to finish: ");
+                int itemId = input.nextInt();
+                input.nextLine(); // Consume newline
+
+                switch (itemId) {
+                    case 0:
+                        System.out.println("Proceeding to payment...");
+                        ordering = false;
+                        break;
+                    case 9:
+                        System.out.print("Enter Product Number to remove: ");
+                        int removeId = input.nextInt();
+                        System.out.print("Enter quantity to remove: ");
+                        int qtyToRemove = input.nextInt();
+                        input.nextLine(); // Consume newline
+
+                        MenuItem toRemove = menu.getItemById(removeId);
+                        if (toRemove == null) {
+                            System.out.println("Invalid product number to remove.");
+                        } else {
+                            order.removeItem(toRemove, qtyToRemove); // Remove specified quantity
+                        }
+                        order.displayOrder(menu);
+                        break;
+                    default:
+                        addItemToOrder(itemId, order);
+                        break;
+                }
+            } catch (InputMismatchException e) {
+                order.displayOrder(menu);
+                System.err.println("Invalid input! Please enter a number.");
+                input.nextLine(); // Clear invalid input
+            }
+        }
+        processPayment(input, order);
+    }
+
+    // Add item to order
+    private void addItemToOrder(int itemId, Order order) {
+        MenuItem item = menu.getItemById(itemId); // Retrieve the item by ID
+        if (item != null) {
+            order.addItem(item);
+            System.out.println(item.getName() + " added to your order.");
+            order.displayOrder(menu);
+        } else {
+            System.out.println("Item not found.");
+            order.displayOrder(menu);
+        }
+    }
+
+    // Process payment
+    private void processPayment(Scanner input, Order order) {
+        while (true) {
+            System.out.print("Enter payment method (CASH/CARD): ");
+            String paymentMethod = input.nextLine().toUpperCase();
+
+            if (payment.processPayment(paymentMethod, order, input)) {
+                payment.printReceipt(order);
+                break;
+            } else {
+                System.out.println("Invalid method of payment. Try again.");
+            }
+        }
+    }
+}
