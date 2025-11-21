@@ -23,6 +23,10 @@ public class Payment implements Assets{
                         System.out.print("Enter payment: ");
                         paid = input.nextDouble();
                         input.nextLine();
+                        if (paid < 0) {
+                            System.out.println("Payment cannot be negative. Please try again.");
+                            continue;
+                        }
                         break;
                     } catch (InputMismatchException e) {
                         System.out.println("Invalid input. Please enter a valid amount.");

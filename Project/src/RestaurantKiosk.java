@@ -134,6 +134,12 @@ public class RestaurantKiosk implements Assets{
         int qty = input.nextInt();
         input.nextLine();
 
+        if (qty < 0) {
+            System.out.println("Quantity cannot be negative.");
+            menu.displayMenu();
+            return;
+        }
+
         order.addItem(item, qty);
         System.out.println(item.getName() + " added to your order.");
         order.displayOrder(menu.getMenuList());
