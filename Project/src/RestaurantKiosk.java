@@ -54,7 +54,7 @@ public class RestaurantKiosk implements Assets{
         while (ordering) {
             try {
                 System.out.print("Enter Product Number (1-4), R to remove an item, or F to finish: ");
-                String itemId = input.nextLine().toUpperCase();
+                String itemId = input.nextLine().trim().toUpperCase();
 
                 switch (itemId) {
                     case "F":
@@ -75,18 +75,31 @@ public class RestaurantKiosk implements Assets{
                         ordering = false;
                         break;
                     case "R":
+                        if (order.orderItems.isEmpty()) {
+                            System.out.println("No ordered to remove.");
+                            break;
+                        }
                         System.out.print("Enter Product Number to remove: ");
                         int removeId = input.nextInt();
+                        input.nextLine();
+
+                        MenuItem toRemove = menu.getItemById(removeId);
+
+                        if (!order.itemQuantities.containsKey(toRemove)) {
+                            System.out.println("Item not found in your order.");
+                            order.displayOrder(menu.getMenuList());
+                            break;
+                        }
                         System.out.print("Enter quantity to remove: ");
                         int qtyToRemove = input.nextInt();
                         input.nextLine();
 
-                        MenuItem toRemove = menu.getItemById(removeId);
-                        if (toRemove == null) {
-                            System.out.println("Invalid product number to remove.");
-                        } else {
-                            order.removeItem(toRemove, qtyToRemove); // Remove specified quantity
+                        if(qtyToRemove < 0) {
+                            System.out.println("No negative values.");
+                            order.displayOrder(menu.getMenuList());
+                            break;
                         }
+                        order.removeItem(toRemove, qtyToRemove);
                         order.displayOrder(menu.getMenuList());
                         break;
                     default:
@@ -101,8 +114,8 @@ public class RestaurantKiosk implements Assets{
                         break;
                 }
             } catch (InputMismatchException e) {
-                order.displayOrder(menu.getMenuList());
                 System.err.println("Invalid input! Please enter a number.");
+                order.displayOrder(menu.getMenuList());
                 input.nextLine(); // Clear invalid input
             }
         }

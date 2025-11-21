@@ -34,10 +34,6 @@ public class Order {
 
     // Remove item from order
     public void removeItem(MenuItem item, int qtyToRemove) {
-        if (item == null) {
-            System.out.println("Item not found in the menu.");
-            return;
-        }
         if (itemQuantities.containsKey(item)) {
             int currentQuantity = itemQuantities.get(item);
             if (qtyToRemove >= currentQuantity) {
@@ -56,8 +52,6 @@ public class Order {
                 itemQuantities.put(item, currentQuantity - qtyToRemove);
                 System.out.println(qtyToRemove + " of " + item.getName() + " removed from your order.");
             }
-        } else {
-            System.out.println("Item not found in your order.");
         }
         calculateTotal(); // Recalculate total after removal
     }

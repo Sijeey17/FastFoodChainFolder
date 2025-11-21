@@ -22,6 +22,6 @@ public class MenuItem {
         return description;
     }
     public String itemInfo() {
-        return String.format(" %-20s | Php%-7s | %-30s |", name, new DecimalFormat("#,###.##").format(price), description);
+        return String.format(" %-20s | Php%-7s | %-30s |", name, new DecimalFormat("#,##0.00").format(price), description);
     }
 }
