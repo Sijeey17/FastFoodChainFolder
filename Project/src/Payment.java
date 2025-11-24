@@ -9,7 +9,6 @@ public class Payment implements Assets{
     private double payment;
     private double change = 0;
 
-    // processPayment now uses the passed Scanner (single Scanner for System.in)
     public boolean processPayment(String paymentMethod, Order order) {
         // Simulate payment processing logic
         double remaining = order.totalAmount;
@@ -17,7 +16,7 @@ public class Payment implements Assets{
         double paid;
 
         if (paymentMethod.equals("CASH")) {
-            while(true) { //270
+            while(true) {
                 while(true){
                     try {
                         System.out.print("Enter payment: ");
@@ -30,7 +29,7 @@ public class Payment implements Assets{
                         break;
                     } catch (InputMismatchException e) {
                         System.out.println("Invalid input. Please enter a valid amount.");
-                        input.nextLine(); // Clear invalid input
+                        input.nextLine();
                     }
                 }
 
@@ -41,17 +40,17 @@ public class Payment implements Assets{
                     payment = totalPaid;
                     if (remaining < 0) change = -remaining;
                     
-                    System.out.printf("    Processing %s payment of Php%s...", paymentMethod, new DecimalFormat("#,###.##").format(payment));
+                    System.out.printf("    Processing %s payment of Php%s...", paymentMethod, new DecimalFormat("#,##0.00").format(payment));
                     Assets.showSpinner();
                     break;
                 } else {
-                    System.out.printf("Insufficient payment. Please add Php %s%n" , new DecimalFormat("#,###.##").format(remaining));
+                    System.out.printf("Insufficient payment. Please add Php %s%n" , new DecimalFormat("#,##0.00").format(remaining));
                 }
             }
             return true;
         } else if (paymentMethod.equals("CARD")) {
             payment = order.totalAmount;
-            System.out.printf("    Processing %s payment of Php%s...", paymentMethod, new DecimalFormat("#,###.##").format(payment));
+            System.out.printf("    Processing %s payment of Php%s...", paymentMethod, new DecimalFormat("#,##0.00").format(payment));
             Assets.showSpinner();
             return true;
         }

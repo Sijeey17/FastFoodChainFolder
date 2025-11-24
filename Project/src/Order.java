@@ -56,7 +56,7 @@ public class Order {
         calculateTotal(); // Recalculate total after removal
     }
 
-    // Calculate total amount (fix: compute subtotal, VAT, then total)
+    // Calculate total amount (compute subtotal, VAT, then total)
     public void calculateTotal() {
         double total = 0;
         for (Map.Entry<MenuItem, Integer> entry : itemQuantities.entrySet()) {
@@ -67,7 +67,6 @@ public class Order {
     }
 
     // Display order summary (accepts a map of menu items to print item IDs)
-
     public void displayOrder(Map<Integer, MenuItem> menuList) {
         System.out.printf("|%s%s%s|%n", "======================", "Current order", "=====================");
         System.out.printf("| %-24s | %-12s | %-12s |%n", "Item", "Quantity", "Amount");
@@ -78,10 +77,10 @@ public class Order {
             if (itemQuantities.containsKey(menuItem)) {
                 int quantity = itemQuantities.get(menuItem);
                 double amount = menuItem.getPrice() * quantity;
-                System.out.printf("| [%d]%-21s | %-12s | Php%-10s|%n", entry.getKey(), menuItem.getName(), new DecimalFormat("#,###").format(quantity), new DecimalFormat("#,###.##").format(amount));
+                System.out.printf("| [%d]%-21s | %-12s | Php%-10s|%n", entry.getKey(), menuItem.getName(), new DecimalFormat("#,###").format(quantity), new DecimalFormat("#,##0.00").format(amount));
             }
         }
         System.out.print("----------------------------------------------------------\n");
-        System.out.printf("| %-42sPhp%-10s|%n%n", "Total Amount:", new DecimalFormat("#,###.##").format(totalAmount));
+        System.out.printf("| %-42sPhp%-10s|%n%n", "Total Amount:", new DecimalFormat("#,##0.00").format(totalAmount));
     }
 }

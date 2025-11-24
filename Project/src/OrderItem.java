@@ -7,7 +7,7 @@ public class OrderItem{
         this.item = item;
     }
     public MenuItem getItem() {
-        return item; // Get the MenuItem
+        return item;
     }
     public double getTotalPrice(int quantity) {
         return item.getPrice() * quantity; // Calculate total price based on passed quantity

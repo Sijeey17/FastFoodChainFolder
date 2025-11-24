@@ -53,7 +53,7 @@ public class RestaurantKiosk implements Assets{
 
         while (ordering) {
             try {
-                System.out.print("Enter Product Number (1-4), R to remove an item, or F to finish: ");
+                System.out.printf("Enter Product Number (1-%d), R to remove an item, or F to finish: ", menu.items.size());
                 String itemId = input.nextLine().trim().toUpperCase();
 
                 switch (itemId) {
@@ -107,7 +107,7 @@ public class RestaurantKiosk implements Assets{
                         try {
                             productId = Integer.parseInt(itemId);
                         } catch (NumberFormatException e) {
-                            System.err.println("Invalid input! Enter 1-4, R, or F.");
+                            System.err.printf("Invalid input! Enter (1-%d), R, or F.%n", menu.items.size());
                             break;
                         }
                         addItemToOrder(productId, order);
@@ -116,7 +116,7 @@ public class RestaurantKiosk implements Assets{
             } catch (InputMismatchException e) {
                 System.err.println("Invalid input! Please enter a number.");
                 order.displayOrder(menu.getMenuList());
-                input.nextLine(); // Clear invalid input
+                input.nextLine();
             }
         }
         processPayment(order);

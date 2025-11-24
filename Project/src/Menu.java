@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 
 // This class represents the menu containing multiple menu items
 public class Menu {
-    private List<MenuItem> items; // List of menu items
+    protected List<MenuItem> items; // List of menu items
     public LinkedHashMap<Integer, MenuItem> menuList; // Map of item ID to ItemInfo (preserves insertion order)
 
     public Menu() {
@@ -15,6 +15,8 @@ public class Menu {
             items.add(new MenuItem("Jolly Spaghetti", 120.00, "Spaghetti"));
             items.add(new MenuItem("Chicken Tender", 60.00, "Chicken"));
             items.add(new MenuItem("Regular Fries", 40.00, "Fries"));
+            items.add(new MenuItem("Jolly Hotdog", 88.00, "Hotdog"));
+            items.add(new MenuItem("Combo 1", 85.00, "YumBurger & Fries"));
         }
         
         menuList = new LinkedHashMap<>();

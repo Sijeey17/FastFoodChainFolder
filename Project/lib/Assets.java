@@ -6,6 +6,8 @@ import Project.src.Order;
 
 public interface Assets {
     Scanner input = new Scanner(System.in);
+
+    // Instantiation of classes
     public Menu menu = new Menu();
     public Payment payment = new Payment();
     public Order order = new Order();
@@ -22,8 +24,7 @@ public interface Assets {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-        }
-
+        } 
         System.out.print("\rDone!                                         \n");
     }
 }
